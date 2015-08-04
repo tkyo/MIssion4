@@ -48,7 +48,7 @@ public class Server {
 		String inline = br.readLine();
 		requestPath = inline.split(" ")[1];
 		if(requestPath.equals("/")){
-			requestPath = "src/index.html";
+			requestPath = "index.html";
 		}
 
 		// リクエストを出力
@@ -68,7 +68,7 @@ public class Server {
 		try {
 
 			// レスポンの生成
-			reader = new BufferedReader(new FileReader(requestPath));
+			reader = new BufferedReader(new FileReader("WebContent/" + requestPath));
 			builder.append("HTTP/1.1 200 OK").append("\n");
 			builder.append("Content-Type: text/html").append("\n");
 			builder.append("\n");
