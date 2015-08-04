@@ -24,22 +24,35 @@ public class Server {
 
 		serverSocket = new ServerSocket(PORT);
 
-		while (true) {
-			socket = serverSocket.accept();
-			System.out.println("request incoming...");
+		try {
+			while (true) {
 
-			// リクエストを解析
-			CheackRequest(socket);
+				socket = serverSocket.accept();
+				System.out.println("request incoming...");
 
-			// レスポンスを生成
-			CreateResponse(socket);
+				// リクエストを解析
+				CheackRequest(socket);
 
-			socket.close();
+				// レスポンスを生成
+				CreateResponse(socket);
 
+			}
+		} finally {
+			if (socket != null) {
+				socket.close();
+			}
+			if(serverSocket != null){
+				serverSocket.close();
+			}
 		}
 
 	}
 
+	/**
+	 * リクエスト文から要求されたファイル名を読み取り、リクエスト文を出力します
+	 *
+	 * @param socket
+	 */
 	private static void CheackRequest(Socket socket) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
@@ -47,7 +60,7 @@ public class Server {
 		// 1行目からリクエストパスを取得しておく(/でアクセスされた場合はindex.htmlを表示）
 		String inline = br.readLine();
 		requestPath = inline.split(" ")[1];
-		if(requestPath.equals("/")){
+		if (requestPath.equals("/")) {
 			requestPath = "index.html";
 		}
 
@@ -59,16 +72,23 @@ public class Server {
 
 	}
 
+	/**
+	 * レスポンス文を生成し、レスポンス文を出力します
+	 *
+	 * @param socket
+	 */
 	private static void CreateResponse(Socket socket) throws IOException {
 		StringBuilder builder = new StringBuilder();
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		BufferedReader reader = null;
-		String inline = null;;
+		String inline = null;
+		;
 
 		try {
 
 			// レスポンの生成
-			reader = new BufferedReader(new FileReader("WebContent/" + requestPath));
+			reader = new BufferedReader(new FileReader("WebContent/"
+					+ requestPath));
 			builder.append("HTTP/1.1 200 OK").append("\n");
 			builder.append("Content-Type: text/html").append("\n");
 			builder.append("\n");
@@ -77,27 +97,28 @@ public class Server {
 			}
 			writer.println(builder.toString());
 
-			//レスポンスの出力
+			// レスポンスの出力
 			System.out.println("responce...");
 			System.out.println(builder.toString() + "\n");
 
-		}catch(FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			// レスポンスの生成
 			builder.append("HTTP/1.1 404 Not Found").append("\n");
-			builder.append("Content-Type: text/html; charset=UTF-8").append("\n");
+			builder.append("Content-Type: text/html; charset=UTF-8").append(
+					"\n");
 			builder.append("\n");
 			builder.append("<html><head><title>HTTP 404 未検出</title></head><body><h1>指定したファイルは存在しません。</h1></body></html>");
 			writer.println(builder.toString());
 
-			//レスポンスの出力
+			// レスポンスの出力
 			System.out.println("responce...");
 			System.out.println(builder.toString() + "\n");
 
-		}finally{
-			if(writer != null){
+		} finally {
+			if (writer != null) {
 				writer.close();
 			}
-			if(reader != null){
+			if (reader != null) {
 				reader.close();
 			}
 		}
