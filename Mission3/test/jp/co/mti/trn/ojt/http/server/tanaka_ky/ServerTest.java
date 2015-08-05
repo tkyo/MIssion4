@@ -1,7 +1,9 @@
+package jp.co.mti.trn.ojt.http.server.tanaka_ky;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import jp.co.mti.trn.ojt.http.server.tanaka_ky.Server;
 import junit.framework.TestCase;
 
 import org.junit.Before;
