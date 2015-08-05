@@ -1,8 +1,11 @@
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,10 +28,10 @@ public class Server {
 		serverSocket = new ServerSocket(PORT);
 
 		try {
+
 			while (true) {
 
 				socket = serverSocket.accept();
-				System.out.println("request incoming...");
 
 				// リクエストを解析
 				CheackRequest(socket);
@@ -41,7 +44,7 @@ public class Server {
 			if (socket != null) {
 				socket.close();
 			}
-			if(serverSocket != null){
+			if (serverSocket != null) {
 				serverSocket.close();
 			}
 		}
@@ -59,15 +62,20 @@ public class Server {
 
 		// 1行目からリクエストパスを取得しておく(/でアクセスされた場合はindex.htmlを表示）
 		String inline = br.readLine();
-		requestPath = inline.split(" ")[1];
-		if (requestPath.equals("/")) {
-			requestPath = "index.html";
-		}
+		if (inline == null) {
+			requestPath = null;
+		} else {
+			requestPath = inline.split(" ")[1];
+			if (requestPath.equals("/")) {
+				requestPath = "index.html";
+			}
 
-		// リクエストを出力
-		while (br.ready() && inline != null) {
-			System.out.println(inline);
-			inline = br.readLine();
+			// リクエストを出力
+			System.out.println("request incoming...");
+			while (br.ready() && inline != null) {
+				System.out.println(inline);
+				inline = br.readLine();
+			}
 		}
 
 	}
@@ -79,27 +87,45 @@ public class Server {
 	 */
 	private static void CreateResponse(Socket socket) throws IOException {
 		StringBuilder builder = new StringBuilder();
+		String inline = null;
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 		BufferedReader reader = null;
-		String inline = null;
-		;
+		PrintStream ps = new PrintStream(socket.getOutputStream(), true);
+		FileInputStream fs = null;
+
+		if (requestPath == null) {
+			return;
+		}
 
 		try {
+			if (requestPath.endsWith(".jpg")) {
+				// レスポンスの生成(画像が要求された場合)
+				builder.append("HTTP/1.1 200 OK").append("\n");
+				builder.append("Content-Type: img/jpg").append("\n");
+				File file = new File("WebContent/" + requestPath);
+				int length = (int) file.length();
+				byte[] bytes = new byte[length];
+				fs = new FileInputStream(file);
+				writer.println(builder.toString());
+				fs.read(bytes);
+				ps.write(bytes, 0, length);
+				ps.flush();
+				writer.println(builder.toString());
 
-			// レスポンの生成
-			reader = new BufferedReader(new FileReader("WebContent/"
-					+ requestPath));
-			builder.append("HTTP/1.1 200 OK").append("\n");
-			builder.append("Content-Type: text/html").append("\n");
-			builder.append("\n");
-			while ((inline = reader.readLine()) != null) {
-				builder.append(inline);
+			} else {
+				reader = new BufferedReader(new FileReader("WebContent/"
+						+ requestPath));
+
+				// レスポンの生成
+				builder.append("HTTP/1.1 200 OK").append("\n");
+				builder.append("Content-Type: text/html").append("\n");
+				builder.append("\n");
+				while ((inline = reader.readLine()) != null) {
+					builder.append(inline);
+				}
+				writer.println(builder.toString());
+
 			}
-			writer.println(builder.toString());
-
-			// レスポンスの出力
-			System.out.println("responce...");
-			System.out.println(builder.toString() + "\n");
 
 		} catch (FileNotFoundException e) {
 			// レスポンスの生成
@@ -110,11 +136,19 @@ public class Server {
 			builder.append("<html><head><title>HTTP 404 未検出</title></head><body><h1>指定したファイルは存在しません。</h1></body></html>");
 			writer.println(builder.toString());
 
+		} finally {
 			// レスポンスの出力
 			System.out.println("responce...");
 			System.out.println(builder.toString() + "\n");
 
-		} finally {
+			if (ps != null) {
+				ps.close();
+			}
+
+			if (fs != null) {
+				fs.close();
+			}
+
 			if (writer != null) {
 				writer.close();
 			}
