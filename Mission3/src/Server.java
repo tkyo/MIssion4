@@ -59,7 +59,7 @@ public class Server {
 	 * @param socket
 	 * @return requestPath
 	 */
-	private static String cheackRequest(Socket socket) throws IOException {
+	public static String cheackRequest(Socket socket) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		String requestPath;
@@ -71,7 +71,7 @@ public class Server {
 		} else {
 			requestPath = inline.split(" ")[1];
 			if (requestPath.equals("/")) {
-				requestPath = "index.html";
+				requestPath = "/index.html";
 			}
 
 			// リクエストを出力
@@ -90,7 +90,7 @@ public class Server {
 	 * @param socket
 	 * @param requestPath
 	 */
-	private static void createResponse(Socket socket, String requestPath)
+	public static void createResponse(Socket socket, String requestPath)
 			throws IOException {
 		StringBuilder builder = new StringBuilder();
 		PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
@@ -100,7 +100,7 @@ public class Server {
 
 		try {
 			if (requestPath.endsWith(".jpg")) {
-				File file = new File("WebContent/" + requestPath);
+				File file = new File("WebContent" + requestPath);
 
 				// レスポンスの生成(画像が要求された場合)
 				builder.append("HTTP/1.1 200 OK").append("\n");
@@ -115,7 +115,7 @@ public class Server {
 				writer.println(builder.toString());
 
 			} else {
-				reader = new BufferedReader(new FileReader("WebContent/"
+				reader = new BufferedReader(new FileReader("WebContent"
 						+ requestPath));
 
 				// レスポンの生成(HTMLファイルが要求された場合)
