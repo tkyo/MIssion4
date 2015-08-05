@@ -24,17 +24,10 @@ public class ServerTest extends TestCase {
 	public void testCheackRequest() throws IOException {
 
 		socket = serverSocket.accept();
-		assertEquals("/EIMS.html", server.cheackRequest(socket));
-		server.createResponse(socket, "index.html");
-
+		assertEquals("/index.html", server.cheackRequest(socket));
+		server.createResponse(socket, "/index.html");
 		socket.close();
 		serverSocket.close();
-	}
-
-	@Test
-	public void testCreateResponse() throws IOException {
-
-
 
 	}
 

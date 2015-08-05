@@ -99,7 +99,7 @@ public class Server {
 		FileInputStream fs = null;
 
 		try {
-			if (requestPath.endsWith(".jpg")) {
+			if (requestPath.endsWith(".jpg") || requestPath.endsWith(".ico")) {
 				File file = new File("WebContent" + requestPath);
 
 				// レスポンスの生成(画像が要求された場合)
