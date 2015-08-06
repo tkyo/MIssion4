@@ -12,7 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 //コミットしました
 //コミット
-
+//こみっと
 /**
  * 簡易HTTPサーバ
  *
